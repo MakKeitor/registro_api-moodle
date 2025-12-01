@@ -2,6 +2,10 @@
 FROM node:22 AS builder
 WORKDIR /app
 
+# Argumento para la URL del API (se inyecta en build time)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Solo los manifests primero
 COPY package.json ./
 
@@ -11,7 +15,6 @@ RUN npm install
 # Ahora sí copiamos el resto del código
 COPY . .
 
-# No horneamos secretos: las env sensibles van en runtime, no aquí
 ENV NODE_ENV=production
 
 # Construye Next dentro del contenedor
