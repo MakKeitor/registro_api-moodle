@@ -107,7 +107,7 @@ export const signup = async (
     formData.append("edad", String(data.edad))
     formData.append("departamento_residencia", data.departamento_residencia)
     formData.append("municipio_residencia", data.municipio_residencia)
-    formData.append("telefono", data.telefono)
+    formData.append("telefono", data.telefono.replace(/-/g, ""))
     formData.append("etnia", data.etnia)
     formData.append("pais", data.pais)
     formData.append("ciudad", data.ciudad)
