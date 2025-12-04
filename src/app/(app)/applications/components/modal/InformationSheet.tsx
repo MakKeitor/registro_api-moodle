@@ -215,7 +215,8 @@ export function InformationSheet({
             applicantName={fullName(data)}
             onSubmit={async ({ id, mode, note }) => {
               await ApplicationsApi.updateStatus({ id, status: mode, note })
-              window.location.reload()
+              // Delay para mostrar el toast antes de refrescar
+              setTimeout(() => window.location.reload(), 1500)
             }}
             trigger={<Button variant="secondary">En revisión</Button>}
           />
@@ -226,7 +227,7 @@ export function InformationSheet({
             applicantName={fullName(data)}
             onSubmit={async ({ id, mode, note }) => {
               await ApplicationsApi.updateStatus({ id, status: mode, note })
-              window.location.reload()
+              setTimeout(() => window.location.reload(), 1500)
             }}
             trigger={<Button variant="destructive">Rechazar</Button>}
           />
@@ -237,7 +238,7 @@ export function InformationSheet({
             applicantName={fullName(data)}
             onSubmit={async ({ id, mode, note }) => {
               await ApplicationsApi.updateStatus({ id, status: mode, note })
-              window.location.reload()
+              setTimeout(() => window.location.reload(), 1500)
             }}
             trigger={<Button>Aprobar</Button>}
           />

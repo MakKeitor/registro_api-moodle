@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 type Mode = "approved" | "rejected" | "in_review"
 
@@ -129,9 +130,28 @@ export function StatusModal({
         mode,
         note: note.trim() || undefined,
       })
+      toast.success(
+        mode === "approved"
+          ? "Solicitud aprobada exitosamente"
+          : mode === "rejected"
+          ? "Solicitud rechazada"
+          : "Solicitud marcada como en revisión"
+      )
       handleClose(false)
     } catch (e) {
-      // aquí podrías disparar un toast de error
+      const errorMessage =
+        e instanceof Error ? e.message : "Error al procesar la solicitud"
+
+      // Verificar si es un error de Moodle
+      const errorType = (e as { type?: string })?.type
+      if (errorType === "MOODLE_ERROR") {
+        toast.error("Error al crear usuario en Moodle", {
+          description: errorMessage,
+          duration: 6000,
+        })
+      } else {
+        toast.error(errorMessage)
+      }
       setLoading(false)
     }
   }
