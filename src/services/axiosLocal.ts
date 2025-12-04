@@ -5,14 +5,3 @@ export const apiLocal = axios.create({
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 })
-
-// Manejo de errores globales
-apiLocal.interceptors.response.use(
-  (res) => res,
-  (err: unknown) => {
-    if (axios.isAxiosError(err) && err.response?.status === 401 && typeof window !== "undefined") {
-      window.location.href = "/auth/signin"
-    }
-    return Promise.reject(err)
-  }
-)
