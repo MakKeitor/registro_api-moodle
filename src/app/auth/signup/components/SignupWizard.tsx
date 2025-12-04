@@ -361,10 +361,19 @@ export default function SignupWizard() {
 
       if (result.success && result.data) {
         const userData = result.data
+
+        // Campos que no cuentan para determinar si hay datos reales
+        const excludedFields = ["dpi", "message", "pais"]
+        // Valores por defecto que no cuentan como datos reales
+        const defaultValues = ["Guatemala", "guatemala"]
+
         const hasData = Object.entries(userData).some(([key, value]) => {
-          if (key === "dpi" || key === "message") return false
+          if (excludedFields.includes(key)) return false
           if (value === null || value === undefined) return false
-          return String(value).trim() !== ""
+          const strValue = String(value).trim()
+          if (strValue === "") return false
+          if (defaultValues.includes(strValue)) return false
+          return true
         })
 
         const edad = calculateAge(userData.fechaNacimiento || "")
@@ -497,7 +506,10 @@ export default function SignupWizard() {
         if (hasData) {
           toast.success("Información prellenada exitosamente")
         } else {
-          toast.info("DPI consultado - complete todos los campos manualmente")
+          toast.warning("No se pudo prellenar la información", {
+            description: "El DPI no está registrado en la base de datos de la CGC. Por favor, rellene todos los campos manualmente.",
+            duration: 6000,
+          })
         }
         nextStep()
         return
@@ -507,18 +519,61 @@ export default function SignupWizard() {
       console.error("Full result:", result)
       setIsPrefilled(false)
       setPrefilledFields({})
+
       // Si el error está vacío, es porque no hay datos, continuar sin prellenar
       if (!result.error || Object.keys(result.error).length === 0) {
-        toast.info("DPI consultado - complete todos los campos manualmente")
+        toast.warning("No se pudo prellenar la información", {
+          description: "El DPI no está registrado en la base de datos de la CGC. Por favor, rellene todos los campos manualmente.",
+          duration: 6000,
+        })
       } else {
-        toast.error(result.error?.message || "Error al prellenar información")
+        // Mostrar toast con descripción según el tipo de error
+        const errorType = (result.error as { type?: string })?.type
+        const errorMessage = result.error?.message || "Error al prellenar información"
+
+        switch (errorType) {
+          case "ACCESS_DENIED":
+            toast.error("Acceso denegado", {
+              description: errorMessage,
+              duration: 6000,
+            })
+            break
+          case "AUTH_ERROR":
+            toast.error("Error de autenticación", {
+              description: errorMessage,
+              duration: 6000,
+            })
+            break
+          case "TIMEOUT":
+            toast.error("Tiempo de espera agotado", {
+              description: errorMessage,
+              duration: 5000,
+            })
+            break
+          case "SERVICE_UNAVAILABLE":
+            toast.error("Servicio no disponible", {
+              description: errorMessage,
+              duration: 5000,
+            })
+            break
+          case "CONNECTION_ERROR":
+            toast.error("Error de conexión", {
+              description: errorMessage,
+              duration: 5000,
+            })
+            break
+          default:
+            toast.error(errorMessage)
+        }
       }
       nextStep()
     } catch (error) {
       console.error("Error en handlePrefill:", error)
       setIsPrefilled(false)
       setPrefilledFields({})
-      toast.error("Error al consultar DPI")
+      toast.error("Error al consultar DPI", {
+        description: "Ocurrió un error inesperado. Intente nuevamente.",
+      })
       nextStep()
     } finally {
       setIsPrefilling(false)
